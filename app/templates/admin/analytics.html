@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <!-- ... existing sidebar code ... -->
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-10 ms-sm-auto px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1>Analytics Dashboard</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="exportReport()">Export Report</button>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                            This Month
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="updatePeriod('month')">This Month</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="updatePeriod('year')">This Year</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-primary text-white h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-uppercase">Total Properties</h6>
+                                    <h2 class="mb-0">{{ total_properties }}</h2>
+                                </div>
+                                <i class="fas fa-home fa-2x opacity-50"></i>
+                            </div>
+                            <small class="text-white-50">+{{ monthly_properties }} this month</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-success text-white h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-uppercase">Total Users</h6>
+                                    <h2 class="mb-0">{{ total_users }}</h2>
+                                </div>
+                                <i class="fas fa-users fa-2x opacity-50"></i>
+                            </div>
+                            <small class="text-white-50">+{{ monthly_users }} this month</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-info text-white h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-uppercase">Total Bookings</h6>
+                                    <h2 class="mb-0">{{ total_bookings }}</h2>
+                                </div>
+                                <i class="fas fa-calendar-check fa-2x opacity-50"></i>
+                            </div>
+                            <small class="text-white-50">+{{ monthly_bookings }} this month</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-warning text-white h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-uppercase">Monthly Revenue</h6>
+                                    <h2 class="mb-0">${{ "%.2f"|format(monthly_revenue) }}</h2>
+                                </div>
+                                <i class="fas fa-dollar-sign fa-2x opacity-50"></i>
+                            </div>
+                            <small class="text-white-50">From {{ total_payments }} payments</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="row">
+                <div class="col-md-8 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Property Listings Trend</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="propertiesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Property Types Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="propertyTypesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Booking Statistics</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="bookingsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Revenue Analysis</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Add Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize charts
+    initializeCharts();
+});
+
+async function initializeCharts() {
+    // Properties Trend Chart
+    const propertiesData = await fetchAnalyticsData('properties');
+    new Chart(document.getElementById('propertiesChart'), {
+        type: 'line',
+        data: {
+            labels: propertiesData.labels,
+            datasets: [{
+                label: 'New Properties',
+                data: propertiesData.data,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        }
+    });
+
+    // Property Types Chart
+    const propertyTypesData = {
+        labels: ['House', 'Apartment', 'Villa', 'Land'],
+        datasets: [{
+            data: [{{ property_types_data|tojson }}],
+            backgroundColor: [
+                'rgb(255, 99, 132)',
+                'rgb(54, 162, 235)',
+                'rgb(255, 205, 86)',
+                'rgb(75, 192, 192)'
+            ]
+        }]
+    };
+    new Chart(document.getElementById('propertyTypesChart'), {
+        type: 'doughnut',
+        data: propertyTypesData
+    });
+
+    // Bookings Chart
+    const bookingsData = await fetchAnalyticsData('bookings');
+    new Chart(document.getElementById('bookingsChart'), {
+        type: 'bar',
+        data: {
+            labels: bookingsData.labels,
+            datasets: [{
+                label: 'Bookings',
+                data: bookingsData.data,
+                backgroundColor: 'rgb(54, 162, 235)'
+            }]
+        }
+    });
+
+    // Revenue Chart
+    const revenueData = await fetchAnalyticsData('revenue');
+    new Chart(document.getElementById('revenueChart'), {
+        type: 'line',
+        data: {
+            labels: revenueData.labels,
+            datasets: [{
+                label: 'Revenue',
+                data: revenueData.data,
+                borderColor: 'rgb(255, 159, 64)',
+                fill: true
+            }]
+        }
+    });
+}
+
+async function fetchAnalyticsData(type) {
+    const response = await fetch(`/admin/analytics/data?type=${type}`);
+    return await response.json();
+}
+
+function exportReport() {
+    // Implementation for exporting analytics report
+    window.print();
+}
+
+function updatePeriod(period) {
+    // Implementation for updating the time period of analytics
+    window.location.href = `/admin/analytics?period=${period}`;
+}
+</script>
+{% endblock %}

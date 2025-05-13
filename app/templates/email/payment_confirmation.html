@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* ... same styles as booking_confirmation.html ... */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Payment Confirmation</h1>
+        </div>
+        <div class="content">
+            <p>Dear {{ payment.user.username }},</p>
+            
+            <p>Your payment has been processed successfully!</p>
+            
+            <h3>Payment Details:</h3>
+            <ul>
+                <li>Transaction ID: {{ payment.transaction_id }}</li>
+                <li>Amount: ${{ "%.2f"|format(payment.amount) }}</li>
+                <li>Date: {{ payment.created_at.strftime('%Y-%m-%d %H:%M') }}</li>
+                <li>Property: {{ payment.property.title }}</li>
+                <li>Payment Type: {{ payment.payment_type }}</li>
+            </ul>
+            
+            <p>Thank you for choosing Elvis Agencies!</p>
+        </div>
+        <div class="footer">
+            <p>Elvis Agencies - Your Trusted Real Estate Partner</p>
+            <p>Contact us: support@elvisagencies.com</p>
+        </div>
+    </div>
+</body>
+</html>

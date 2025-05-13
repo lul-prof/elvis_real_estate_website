@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('user.dashboard') }}">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('user.my_bookings') }}">
+                            My Bookings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('user.my_favorites') }}">
+                            Favorite Properties
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('user.profile') }}">
+                            Profile Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-10 ms-sm-auto px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1>My Dashboard</h1>
+            </div>
+
+            <!-- Recent Bookings -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h3>Recent Bookings</h3>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Property</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.property.title }}</td>
+                                    <td>{{ booking.booking_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{{ booking.status }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Favorite Properties -->
+                <div class="col-md-6">
+                    <h3>Favorite Properties</h3>
+                    <div class="row">
+                        {% for property in favorite_properties %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                {% if property.images %}
+                                <img src="{{ url_for('static', filename='uploads/' + property.images[0].filename) }}" 
+                                     class="card-img-top" alt="{{ property.title }}">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ property.title }}</h5>
+                                    <p class="card-text">${{ "%.2f"|format(property.price) }}</p>
+                                    <a href="{{ url_for('property.view_property', property_id=property.id) }}" 
+                                       class="btn btn-primary">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

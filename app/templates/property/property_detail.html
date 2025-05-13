@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Property Images Carousel -->
+            <div id="propertyCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for image in property.images %}
+                    <div class="carousel-item {% if loop.first %}active{% endif %}">
+                        <img src="{{ url_for('static', filename='uploads/' + image.filename) }}" class="d-block w-100" alt="{{ property.title }}">
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#propertyCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#propertyCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+
+            <!-- Property Details -->
+            <div class="mt-4">
+                <h1>{{ property.title }}</h1>
+                <p class="lead">${{ "%.2f"|format(property.price) }}</p>
+                <p>{{ property.description }}</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h4>Property Details</h4>
+                        <ul class="list-unstyled">
+                            <li>Type: {{ property.property_type.title() }}</li>
+                            <li>Status: {{ property.status.replace('_', ' ').title() }}</li>
+                            <li>Bedrooms: {{ property.bedrooms }}</li>
+                            <li>Bathrooms: {{ property.bathrooms }}</li>
+                            <li>Area: {{ property.area }} sq ft</li>
+                            <li>
+                                {% if property.images %}
+                                <div class="property-images">
+                                    <ul class="image-gallery">
+                                        {% for image in property.images %}
+                                        <li><img src="{{ url_for('static', filename='uploads/' + image.filename) }}" class="card-img-top" alt="{{ property.title }}"></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Location</h4>
+                        <p>{{ property.location }}</p>
+                        <div id="map" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Contact Agent Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Contact Agent</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('property.contact_agent', property_id=property.id) }}">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="phone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Send Message</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Schedule Viewing -->
+            {% if current_user.is_authenticated %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Schedule Viewing</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('booking.schedule_viewing', property_id=property.id) }}">
+                        {{ viewing_form.hidden_tag() }}
+                        <div class="mb-3">
+                            <label for="viewing_date" class="form-label">Preferred Date</label>
+                            <input type="date" class="form-control" id="viewing_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="viewing_time" class="form-label">Preferred Time</label>
+                            <input type="time" class="form-control" id="viewing_time" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Schedule Viewing</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>Reviews</h4>
+            </div>
+            <div class="card-body">
+                {% if current_user.is_authenticated %}
+                <form method="POST" action="{{ url_for('property.add_review', property_id=property.id) }}" class="mb-4">
+                    <div class="mb-3">
+                        <label for="rating" class="form-label">Rating</label>
+                        <select class="form-select" id="rating" name="rating" required>
+                            <option value="">Select rating</option>
+                            {% for i in range(1, 6) %}
+                            <option value="{{ i }}">{{ i }} stars</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Your Review</label>
+                        <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                </form>
+                {% endif %}
+
+                <div class="reviews-list">
+                    {% for review in property.reviews %}
+                    <div class="review-item mb-3 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h5 class="mb-1">{{ review.user.username }}</h5>
+                                <div class="text-warning mb-2">
+                                    {% for i in range(review.rating) %}
+                                    <i class="fas fa-star"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                {{ review.created_at.strftime('%Y-%m-%d') }}
+                            </small>
+                        </div>
+                        <p class="mb-0">{{ review.content }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Add this section after the property details -->
+{% if similar_properties %}
+<div class="container mt-4">
+    <h3>Similar Properties</h3>
+    <div class="row">
+        {% for property in similar_properties %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if property.images %}
+                <img src="{{ url_for('static', filename='uploads/' + property.images[0].filename) }}" 
+                     class="card-img-top" alt="{{ property.title }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ property.title }}</h5>
+                    <p class="card-text text-muted">{{ property.location }}</p>
+                    <p class="card-text">
+                        <strong>${{ "%.2f"|format(property.price) }}</strong>
+                        {% if property.status == 'for_rent' %}/ month{% endif %}
+                    </p>
+                    <a href="{{ url_for('property.view_property', property_id=property.id) }}" 
+                       class="btn btn-primary w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Google Maps Script -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ config.GOOGLE_MAPS_API_KEY }}&callback=initMap" async defer></script>
+<script>
+function initMap() {
+    const location = { lat: {{ property.latitude }}, lng: {{ property.longitude }} };
+    const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 15,
+        center: location,
+    });
+    const marker = new google.maps.Marker({
+        position: location,
+        map: map,
+    });
+}
+</script>
+{% endblock %}

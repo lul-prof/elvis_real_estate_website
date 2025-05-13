@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Hero Section -->
+        <div class="col-12 text-center mb-5">
+            <h1>Find Your Perfect Property</h1>
+            <p class="lead">Browse through our extensive collection of properties for sale and rent</p>
+            <a href="{{ url_for('main.search') }}" class="btn btn-primary btn-lg">Start Searching</a>
+        </div>
+    </div>
+
+    <!-- Featured Properties -->
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Featured Properties</h2>
+        </div>
+        {% for property in featured_properties %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if property.images %}
+                <img src="{{ url_for('static', filename='uploads/' + property.images[0].filename) }}" 
+                     class="card-img-top" alt="{{ property.title }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ property.title }}</h5>
+                    <p class="card-text text-muted">{{ property.location }}</p>
+                    <p class="card-text">
+                        <strong>${{ "%.2f"|format(property.price) }}</strong>
+                        {% if property.status == 'for_rent' %}/ month{% endif %}
+                    </p>
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fas fa-bed"></i> {{ property.bedrooms }} bed</span>
+                        <span><i class="fas fa-bath"></i> {{ property.bathrooms }} bath</span>
+                        <span><i class="fas fa-ruler-combined"></i> {{ property.area }} sq ft</span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('property.view_property', property_id=property.id) }}" 
+                       class="btn btn-primary btn-sm w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

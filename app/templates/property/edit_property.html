@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Edit Property</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control") }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.title.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows="4") }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.description.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.price.label(class="form-label") }}
+                                {{ form.price(class="form-control") }}
+                                {% if form.price.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.price.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.property_type.label(class="form-label") }}
+                                {{ form.property_type(class="form-control") }}
+                                {% if form.property_type.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.property_type.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.status.label(class="form-label") }}
+                            {{ form.status(class="form-control") }}
+                            {% if form.status.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.status.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.location.label(class="form-label") }}
+                            {{ form.location(class="form-control") }}
+                            {% if form.location.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.location.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.latitude.label(class="form-label") }}
+                                {{ form.latitude(class="form-control") }}
+                                {% if form.latitude.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.latitude.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.longitude.label(class="form-label") }}
+                                {{ form.longitude(class="form-control") }}
+                                {% if form.longitude.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.longitude.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                {{ form.bedrooms.label(class="form-label") }}
+                                {{ form.bedrooms(class="form-control") }}
+                                {% if form.bedrooms.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.bedrooms.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ form.bathrooms.label(class="form-label") }}
+                                {{ form.bathrooms(class="form-control") }}
+                                {% if form.bathrooms.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.bathrooms.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ form.area.label(class="form-label") }}
+                                {{ form.area(class="form-control") }}
+                                {% if form.area.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.area.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if property.images %}
+                        <div class="mb-3">
+                            <label class="form-label">Current Images</label>
+                            <div class="row">
+                                {% for image in property.images %}
+                                <div class="col-md-3 mb-2">
+                                    <img src="{{ url_for('static', filename='uploads/' + image.filename) }}" 
+                                         class="img-thumbnail" alt="Property image">
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            {{ form.images.label(class="form-label") }}
+                            <small class="text-muted d-block">Upload new images to add to the property</small>
+                            {{ form.images(class="form-control") }}
+                            {% if form.images.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.images.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mt-4">
+                            {{ form.submit(class="btn btn-primary w-100", value="Update Property") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

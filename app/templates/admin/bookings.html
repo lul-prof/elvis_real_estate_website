@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.manage_users') }}">
+                            Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.manage_properties') }}">
+                            Properties
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin.manage_bookings') }}">
+                            Bookings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-10 ms-sm-auto px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1>Manage Bookings</h1>
+            </div>
+
+            <!-- Bookings Table -->
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Client</th>
+                            <th>Agent</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings.items %}
+                        <tr>
+                            <td>{{ booking.property.title }}</td>
+                            <td>{{ booking.user.username }}</td>
+                            <td>{{ booking.property.owner.username }}</td>
+                            <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ booking.booking_date.strftime('%H:%M') }}</td>
+                            <td>{{ booking.status }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-success" onclick="updateBookingStatus({{ booking.id }}, 'approved')">Approve</button>
+                                <button class="btn btn-sm btn-danger" onclick="updateBookingStatus({{ booking.id }}, 'rejected')">Reject</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if bookings.pages > 1 %}
+            <nav aria-label="Bookings pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% for page_num in bookings.iter_pages() %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == bookings.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('admin.manage_bookings', page=page_num) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+            {% endif %}
+        </main>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function updateBookingStatus(bookingId, status) {
+    fetch(`/admin/bookings/${bookingId}/update-status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reload the page to show updated status
+            location.reload();
+        } else {
+            alert('Failed to update booking status');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating the booking status');
+    });
+}
+</script>
+{% endblock %}

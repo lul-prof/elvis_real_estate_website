@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* ... same styles as booking_confirmation.html ... */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Property Viewing Request</h1>
+        </div>
+        <div class="content">
+            <p>Dear {{ booking.property.owner.username }},</p>
+            
+            <p>A new viewing request has been scheduled for your property.</p>
+            
+            <h3>Viewing Details:</h3>
+            <ul>
+                <li>Property: {{ booking.property.title }}</li>
+                <li>Client: {{ booking.user.username }}</li>
+                <li>Contact: {{ booking.user.email }}</li>
+                <li>Date: {{ booking.booking_date.strftime('%Y-%m-%d') }}</li>
+                <li>Time: {{ booking.booking_date.strftime('%H:%M') }}</li>
+            </ul>
+            
+            <p>Please log in to your agent dashboard to confirm or reschedule this viewing.</p>
+        </div>
+        <div class="footer">
+            <p>Elvis Agencies - Your Trusted Real Estate Partner</p>
+            <p>Contact us: support@elvisagencies.com</p>
+        </div>
+    </div>
+</body>
+</html>

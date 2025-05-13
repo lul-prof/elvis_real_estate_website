@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Search Filters -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Search Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('main.search') }}" id="searchForm">
+                        <div class="mb-3">
+                            <label for="q" class="form-label">Search</label>
+                            <input type="text" class="form-control" id="q" name="q" value="{{ request.args.get('q', '') }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="type" class="form-label">Property Type</label>
+                            <select class="form-select" id="type" name="type">
+                                <option value="">All Types</option>
+                                <option value="house" {% if request.args.get('type') == 'house' %}selected{% endif %}>House</option>
+                                <option value="apartment" {% if request.args.get('type') == 'apartment' %}selected{% endif %}>Apartment</option>
+                                <option value="villa" {% if request.args.get('type') == 'villa' %}selected{% endif %}>Villa</option>
+                                <option value="land" {% if request.args.get('type') == 'land' %}selected{% endif %}>Land</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Price Range</label>
+                            <div class="row">
+                                <div class="col">
+                                    <input type="number" class="form-control" name="min_price" placeholder="Min" value="{{ request.args.get('min_price', '') }}">
+                                </div>
+                                <div class="col">
+                                    <input type="number" class="form-control" name="max_price" placeholder="Max" value="{{ request.args.get('max_price', '') }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="bedrooms" class="form-label">Bedrooms</label>
+                            <select class="form-select" id="bedrooms" name="bedrooms">
+                                <option value="">Any</option>
+                                {% for i in range(1, 7) %}
+                                <option value="{{ i }}" {% if request.args.get('bedrooms')|int == i %}selected{% endif %}>{{ i }}+</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">Any</option>
+                                <option value="for_sale" {% if request.args.get('status') == 'for_sale' %}selected{% endif %}>For Sale</option>
+                                <option value="for_rent" {% if request.args.get('status') == 'for_rent' %}selected{% endif %}>For Rent</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="sort" class="form-label">Sort By</label>
+                            <select class="form-select" id="sort" name="sort">
+                                <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Newest First</option>
+                                <option value="price_low" {% if request.args.get('sort') == 'price_low' %}selected{% endif %}>Price (Low to High)</option>
+                                <option value="price_high" {% if request.args.get('sort') == 'price_high' %}selected{% endif %}>Price (High to Low)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Search Results</h2>
+                <span>{{ properties.total }} properties found</span>
+            </div>
+
+            <div class="row">
+                {% for property in properties.items %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        {% if property.images %}
+                        <img src="{{ url_for('static', filename='uploads/' + property.images[0].filename) }}" 
+                             class="card-img-top" alt="{{ property.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ property.title }}</h5>
+                            <p class="card-text text-muted">{{ property.location }}</p>
+                            <p class="card-text">
+                                <strong>${{ "%.2f"|format(property.price) }}</strong>
+                                {% if property.status == 'for_rent' %}/ month{% endif %}
+                            </p>
+                            <div class="d-flex justify-content-between">
+                                <span><i class="fas fa-bed"></i> {{ property.bedrooms }} bed</span>
+                                <span><i class="fas fa-bath"></i> {{ property.bathrooms }} bath</span>
+                                <span><i class="fas fa-ruler-combined"></i> {{ property.area }} sq ft</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ url_for('property.view_property', property_id=property.id) }}" 
+                               class="btn btn-primary btn-sm w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if properties.pages > 1 %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% for page_num in properties.iter_pages(left_edge=2, left_current=2, right_current=2, right_edge=2) %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == properties.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('main.search', page=page_num, **request.args) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}

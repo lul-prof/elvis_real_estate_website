@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Recommended Properties</h2>
+    <p class="text-muted">Based on your interests and viewing history</p>
+
+    <div class="row">
+        {% for property in properties %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if property.images %}
+                <img src="{{ url_for('static', filename='uploads/' + property.images[0].filename) }}" 
+                     class="card-img-top" alt="{{ property.title }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ property.title }}</h5>
+                    <p class="card-text text-muted">{{ property.location }}</p>
+                    <p class="card-text">
+                        <strong>${{ "%.2f"|format(property.price) }}</strong>
+                        {% if property.status == 'for_rent' %}/ month{% endif %}
+                    </p>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span><i class="fas fa-bed"></i> {{ property.bedrooms }} bed</span>
+                        <span><i class="fas fa-bath"></i> {{ property.bathrooms }} bath</span>
+                        <span><i class="fas fa-ruler-combined"></i> {{ property.area }} sq ft</span>
+                    </div>
+                    <a href="{{ url_for('property.view_property', property_id=property.id) }}" 
+                       class="btn btn-primary w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not properties %}
+    <div class="text-center py-5">
+        <h3>No recommendations yet</h3>
+        <p>Start browsing properties to get personalized recommendations!</p>
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary">Browse Properties</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
